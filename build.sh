@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Project configuration
-PROJECT_NAME="ai_gen_transport_2"
+PROJECT_NAME="transport_network"
 BUILD_DIR="build"
 CMAKE_BUILD_TYPE="Release"
 
@@ -61,7 +61,7 @@ DEBUG_BUILD=false
 VERBOSE_BUILD=false
 INSTALL_BUILD=false
 RUN_TESTS=false
-JOBS=$(nproc 2>/dev/null || echo "4")
+JOBS=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -156,20 +156,33 @@ print_status "Configuring project with CMake..."
 CMAKE_ARGS=(
     -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE"
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    -DCMAKE_UNITY_BUILD=ON  # Faster builds with unity build
 )
 
 if [ "$VERBOSE_BUILD" = true ]; then
     CMAKE_ARGS+=(-DCMAKE_VERBOSE_MAKEFILE=ON)
 fi
 
+# Determine number of CPU cores for parallel build
+if [ -z "$JOBS" ]; then
+    if command -v nproc &> /dev/null; then
+        JOBS=$(nproc)
+    elif command -v sysctl &> /dev/null && sysctl -n hw.ncpu &> /dev/null; then
+        JOBS=$(sysctl -n hw.ncpu)
+    else
+        JOBS=4  # Default if we can't detect
+    fi
+fi
+print_status "Using $JOBS parallel jobs for compilation"
+
 # Try to use Ninja if available, otherwise use Make
 if command -v ninja &> /dev/null; then
     CMAKE_ARGS+=(-GNinja)
     BUILD_TOOL="ninja"
-    print_status "Using Ninja build system"
+    print_status "Using Ninja build system (faster builds)"
 else
     BUILD_TOOL="make"
-    print_status "Using Make build system"
+    print_status "Using Make build system (consider installing Ninja for faster builds)"
 fi
 
 if ! cmake "${CMAKE_ARGS[@]}" ..; then
@@ -180,11 +193,11 @@ fi
 print_success "CMake configuration completed"
 
 # Build the project
-print_status "Building project..."
+print_status "Building project with $JOBS parallel jobs..."
 BUILD_ARGS=()
 
 if [ "$BUILD_TOOL" = "ninja" ]; then
-    BUILD_ARGS+=(-j "$JOBS")
+    # Ninja automatically uses the optimal number of jobs, no need to specify -j
     if [ "$VERBOSE_BUILD" = true ]; then
         BUILD_ARGS+=(-v)
     fi
@@ -214,4 +227,17 @@ fi
 
 # Run tests if requested and available
 if [ "$RUN_TESTS" = true ]; then
-    print_status "Running tests
+    print_status "Running tests..."
+
+    if [ -f "$PROJECT_NAME-tests" ] || [ -f "$PROJECT_NAME-test" ] || [ -f "test_$PROJECT_NAME" ]; then
+        ctest --output-on-failure
+        print_success "Tests completed"
+    else
+        print_warning "No tests found"
+    fi
+fi
+
+# Return to the original directory
+cd ..
+
+print_success "$PROJECT_NAME build process completed"

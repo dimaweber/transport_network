@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.31)
-project(ai_gen_transport_2)
+cmake_minimum_required(VERSION 3.10)
+project(transport_network)
+set(TARGET transport_network)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -22,11 +23,11 @@ set(HEADERS
         include/dot_parser.hxx)
 
 # Add executable
-add_executable(ai_gen_transport_2 ${SOURCES})
+add_executable(${TARGET} ${SOURCES})
 
 # Link libraries
-target_link_libraries(ai_gen_transport_2 PRIVATE
-    CLI11::CLI11
-    fmt::fmt
-    spdlog::spdlog
+target_link_libraries(${TARGET} PRIVATE
+        CLI11::CLI11
+        fmt::fmt
+        spdlog::spdlog
 )

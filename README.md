@@ -55,6 +55,13 @@ The cities are connected by 12 roads with varying characteristics:
 
 ## Technical Implementation
 
+### Dependencies
+- **CMake** (>= 3.10)
+- **CLI11** - Command line interface library
+- **fmt** - Formatting library
+- **spdlog** - Logging library
+- **Graphviz** (optional) - For network visualization
+
 ### File Structure:
 - `networks/got.dot` - Graph definition in DOT format (Game of Thrones network)
 - `CMakeLists.txt` - Build configuration
@@ -70,25 +77,45 @@ The simulation provides a command-line interface with several options:
 
 ```bash
 # Display basic city list
-./ai_gen_transport_2 show cities
+./transport_network show cities
 
 # Display city list with warehouse information
-./ai_gen_transport_2 show cities --warehouse
+./transport_network show cities --warehouse
 
 # Display city list with fleet information
-./ai_gen_transport_2 show cities --fleet
+./transport_network show cities --fleet
 
 # Display city list with connected cities
-./ai_gen_transport_2 show cities --neighbor
+./transport_network show cities --neighbor
 
 # Display city list with average distances
-./ai_gen_transport_2 show cities --avg-dist
+./transport_network show cities --avg-dist
 
 # Display network statistics
-./ai_gen_transport_2 --stats
+./transport_network --stats
+
+# Ship cargo between cities (with required parameters)
+./transport_network ship wood 12.2 Winterfell 12:00
+
+# Ship cargo from specific cities
+./transport_network ship iron 10 Winterfell 12:00 --from Braavos,Pentos,Qarth
 ```
 
 ### Development
+
+#### Building the Project
+The project includes a build script that supports parallel builds and detects the Ninja build system:
+
+```bash
+# Basic build
+./build.sh
+
+# Clean debug build with 8 jobs
+./build.sh --clean --debug --jobs 8
+
+# For more options
+./build.sh --help
+```
 
 #### Code Style
 The project uses clang-format for consistent code style. Apply formatting with:

@@ -7,6 +7,7 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
+#include <fmt/ranges.h>  // For fmt::join
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -127,6 +128,47 @@ int main (int argc, char** argv)
     cities_cmd->add_flag("--avg-dist", city_options.show_avg_dist, "Display average distance to neighboring cities");
     cities_cmd->callback([&] ( ) { show_cities_cmd = true; });
 
+    // Add 'ship' command for cargo transportation
+    struct ShipCommandOptions {
+        std::string cargo_type;
+        double cargo_mass = 0.0;
+        std::string destination;
+        std::string arrival_time;
+        std::vector<std::string> from_cities;
+        bool ship_command = false;
+    };
+
+    ShipCommandOptions ship_options;
+    auto ship_cmd = app.add_subcommand("ship", "Ship cargo between cities");
+
+    // Required parameters for ship command
+    ship_cmd->add_option("cargo", ship_options.cargo_type, "Type of cargo to ship (wood, iron, silk)")
+            ->required()
+            ->check(CLI::IsMember({"wood", "iron", "silk"}, CLI::ignore_case));
+
+    ship_cmd->add_option("mass", ship_options.cargo_mass, "Mass of cargo in tons")
+            ->required()
+            ->transform([](std::string mass) {
+                // Handle both "10t" and "10" formats
+                if (mass.back() == 't') {
+                    mass.pop_back();
+                }
+                return mass;
+            });
+
+    ship_cmd->add_option("destination", ship_options.destination, "Destination city")
+            ->required();
+
+    ship_cmd->add_option("time", ship_options.arrival_time, "Required arrival time (format: HH:MM)")
+            ->required()
+            ->check(CLI::TypeValidator<std::string>{"HH:MM"});
+
+    // Optional parameters
+    ship_cmd->add_option("--from", ship_options.from_cities, "Comma-separated list of source cities")
+            ->delimiter(',');
+
+    ship_cmd->callback([&]() { ship_options.ship_command = true; });
+
     // Parse command line
     try {
         app.parse(argc, argv);
@@ -162,6 +204,74 @@ int main (int argc, char** argv)
     // Show cities if requested
     if ( show_cities_cmd ) {
         print_cities_list(parser.get_network( ), city_options);
+    }
+
+    // Handle ship command if requested
+    if ( ship_options.ship_command ) {
+        const auto& network = parser.get_network();
+
+        // Validate destination city exists
+        if (!network.get_city(ship_options.destination)) {
+            spdlog::error("Destination city '{}' not found in the network", ship_options.destination);
+            return EXIT_FAILURE;
+        }
+
+        // Format cargo type to proper case
+        std::string cargo_display;
+        GoodsType cargo_type;
+        if (ship_options.cargo_type == "wood" || ship_options.cargo_type == "WOOD") {
+            cargo_display = "Wood";
+            cargo_type = GoodsType::Wood;
+        } else if (ship_options.cargo_type == "iron" || ship_options.cargo_type == "IRON") {
+            cargo_display = "Iron";
+            cargo_type = GoodsType::Iron;
+        } else if (ship_options.cargo_type == "silk" || ship_options.cargo_type == "SILK") {
+            cargo_display = "Silk";
+            cargo_type = GoodsType::Silk;
+        }
+
+        // Display shipping request
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::blue), "\n=== Shipping Request ===\n");
+        fmt::print("Cargo: {} {:.1f}t\n", cargo_display, ship_options.cargo_mass);
+        fmt::print("Destination: {}\n", ship_options.destination);
+        fmt::print("Arrival time: {}\n", ship_options.arrival_time);
+
+        std::vector<std::string> source_cities;
+        if (ship_options.from_cities.empty()) {
+            // If no source cities specified, use all cities except destination
+            for (const auto& [name, _] : network.cities) {
+                if (name != ship_options.destination &&
+                    name != "legend" &&
+                    !name.starts_with("cluster_")) {
+                    source_cities.push_back(name);
+                }
+            }
+            fmt::print("Source cities: All available cities\n");
+        } else {
+            // Validate that all specified source cities exist
+            for (const auto& city : ship_options.from_cities) {
+                if (!network.get_city(city)) {
+                    spdlog::error("Source city '{}' not found in the network", city);
+                    return EXIT_FAILURE;
+                }
+                source_cities.push_back(city);
+            }
+            // Create a comma-separated list of cities manually
+            std::string cities_list;
+            for (size_t i = 0; i < source_cities.size(); ++i) {
+                if (i > 0) cities_list += ", ";
+                cities_list += source_cities[i];
+            }
+            fmt::print("Source cities: {}", cities_list);
+        }
+
+        fmt::print("\n\n");
+        fmt::print(fmt::emphasis::bold, "Finding optimal shipping routes...\n");
+
+        // TODO: Implement actual shipping logic to find optimal routes
+        // For now, just provide a placeholder implementation
+        fmt::print("Results would show the best possible routes to ship {:.1f}t of {} to {} by {}\n",
+            ship_options.cargo_mass, cargo_display, ship_options.destination, ship_options.arrival_time);
     }
 
     // Save to output file if specified
