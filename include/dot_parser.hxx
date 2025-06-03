@@ -13,13 +13,14 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <memory>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-namespace transport {
+namespace transport
+{
 
 // Forward declarations
 struct Warehouse;
@@ -29,55 +30,42 @@ struct City;
 struct TransportNetwork;
 
 // Enums for better type safety
-enum class GoodsType {
-    Wood,
-    Iron,
-    Silk
-};
+enum class GoodsType { Wood, Iron, Silk };
 
-enum class TruckType {
-    Ford,
-    Man,
-    Vw
-};
+enum class TruckType { Ford, Man, Vw };
 
-enum class RoadType {
-    Standard,
-    Alternative,
-    LongDistance
-};
+enum class RoadType { Standard, Alternative, LongDistance };
 
 // Data structures
 struct Goods {
     GoodsType type;
-    double quantity_tons;
+    double    quantity_tons;
 
-    Goods(GoodsType t, double qty) : type(t), quantity_tons(qty) {}
+    Goods (GoodsType t, double qty) : type(t), quantity_tons(qty) { }
 };
 
 struct Truck {
     TruckType type;
-    int count;
-    double max_capacity_tons;
-    double max_speed_kmh;
+    int       count;
+    double    max_capacity_tons;
+    double    max_speed_kmh;
 
-    Truck(TruckType t, int c, double cap, double speed)
-        : type(t), count(c), max_capacity_tons(cap), max_speed_kmh(speed) {}
+    Truck (TruckType t, int c, double cap, double speed) : type(t), count(c), max_capacity_tons(cap), max_speed_kmh(speed) { }
 };
 
 struct Warehouse {
     std::vector<Goods> goods;
 
-    void add_goods(GoodsType type, double quantity);
+    void   add_goods(GoodsType type, double quantity);
     double get_goods_quantity(GoodsType type) const;
-    void set_goods_quantity(GoodsType type, double quantity);
+    void   set_goods_quantity(GoodsType type, double quantity);
 };
 
 struct TruckFleet {
     std::vector<Truck> trucks;
 
-    void add_truck(TruckType type, int count, double capacity, double speed);
-    int get_truck_count(TruckType type) const;
+    void         add_truck(TruckType type, int count, double capacity, double speed);
+    int          get_truck_count(TruckType type) const;
     const Truck* get_truck(TruckType type) const;
 };
 
@@ -85,63 +73,72 @@ struct Road {
     std::string from_city;
     std::string to_city;
     std::string name;
-    double max_mass_tons;
-    double max_speed_kmh;
-    RoadType type;
+    double      max_mass_tons;
+    double      max_speed_kmh;
+    RoadType    type;
 
-    Road(const std::string& from, const std::string& to, const std::string& road_name,
-         double mass, double speed, RoadType road_type)
-        : from_city(from), to_city(to), name(road_name), max_mass_tons(mass),
-          max_speed_kmh(speed), type(road_type) {}
+    Road (const std::string& from, const std::string& to, const std::string& road_name, double mass, double speed, RoadType road_type) :
+        from_city(from),
+        to_city(to),
+        name(road_name),
+        max_mass_tons(mass),
+        max_speed_kmh(speed),
+        type(road_type)
+    {
+    }
 };
 
 struct City {
     std::string name;
-    Warehouse warehouse;
-    TruckFleet fleet;
+    Warehouse   warehouse;
+    TruckFleet  fleet;
 
-    explicit City(const std::string& city_name) : name(city_name) {}
+    explicit City (const std::string& city_name) : name(city_name) { }
 };
 
 struct TransportNetwork {
     std::unordered_map<std::string, std::unique_ptr<City>> cities;
-    std::vector<Road> roads;
+    std::vector<Road>                                      roads;
 
-    void add_city(const std::string& name);
-    City* get_city(const std::string& name);
+    void        add_city(const std::string& name);
+    City*       get_city(const std::string& name);
     const City* get_city(const std::string& name) const;
-    void add_road(const Road& road);
+    void        add_road(const Road& road);
 
     // Network analysis methods
     std::vector<std::string> get_connected_cities(const std::string& city_name) const;
-    std::vector<Road> get_roads_from_city(const std::string& city_name) const;
-    bool has_direct_connection(const std::string& from, const std::string& to) const;
+    std::vector<Road>        get_roads_from_city(const std::string& city_name) const;
+    bool                     has_direct_connection(const std::string& from, const std::string& to) const;
 
     // Statistics
-    size_t get_city_count() const { return cities.size(); }
-    size_t get_road_count() const { return roads.size(); }
+    size_t get_city_count ( ) const { return cities.size( ); }
+
+    size_t get_road_count ( ) const { return roads.size( ); }
 };
 
 // Parser class
-class DotParser {
+class DotParser
+{
 public:
-    DotParser() = default;
-    ~DotParser() = default;
+    DotParser( )  = default;
+    ~DotParser( ) = default;
 
     // Main parsing methods
     bool parse_file(const std::string& filename);
     bool parse_string(const std::string& dot_content);
 
     // Access parsed data
-    const TransportNetwork& get_network() const { return network_; }
-    TransportNetwork& get_network() { return network_; }
+    const TransportNetwork& get_network ( ) const { return network_; }
+
+    TransportNetwork& get_network ( ) { return network_; }
 
     // Error handling
-    const std::string& get_last_error() const { return last_error_; }
-    bool has_error() const { return !last_error_.empty(); }
+    const std::string& get_last_error ( ) const { return last_error_; }
+
+    bool has_error ( ) const { return !last_error_.empty( ); }
 
     // Utility methods
-    void clear();
+    void clear( );
     void print_network_summary(std::ostream& os = std::cout) const;
 
     // Type conversion utilities - made public for use in free functions
@@ -150,7 +147,7 @@ public:
 
 private:
     TransportNetwork network_;
-    std::string last_error_;
+    std::string      last_error_;
 
     // Internal parsing methods
     bool parse_dot_content(const std::string& content);
@@ -163,7 +160,7 @@ private:
     bool parse_truck_section(const std::string& section, TruckFleet& fleet);
 
     // Edge parsing helpers
-    bool parse_road_label(const std::string& label, Road& road);
+    bool     parse_road_label(const std::string& label, Road& road);
     RoadType determine_road_type(const std::string& road_name, const std::string& color);
 
     // Utility parsing methods
@@ -172,17 +169,17 @@ private:
     std::string extract_edge_nodes(const std::string& line, std::string& from, std::string& to);
 
     // String processing utilities
-    std::string trim(const std::string& str);
+    std::string              trim(const std::string& str);
     std::vector<std::string> split(const std::string& str, char delimiter);
-    std::string remove_quotes(const std::string& str);
-    bool extract_numeric_value(const std::string& text, const std::string& prefix, double& value);
+    std::string              remove_quotes(const std::string& str);
+    bool                     extract_numeric_value(const std::string& text, const std::string& prefix, double& value);
 
     // Type conversion utilities
     GoodsType string_to_goods_type(const std::string& str);
     TruckType string_to_truck_type(const std::string& str);
 
     // Validation methods
-    bool validate_network();
+    bool validate_network( );
     bool validate_city(const City& city);
     bool validate_road(const Road& road);
 
@@ -194,13 +191,13 @@ private:
 // City display options struct for controlling city information display
 struct CityDisplayOptions {
     bool show_warehouse = false;
-    bool show_fleet = false;
+    bool show_fleet     = false;
     bool show_neighbors = false;
-    bool show_avg_dist = false;
+    bool show_avg_dist  = false;
 };
 
 // Utility functions
 std::string load_file_content(const std::string& filename);
-bool save_network_to_dot(const TransportNetwork& network, const std::string& filename);
+bool        save_network_to_dot(const TransportNetwork& network, const std::string& filename);
 
-} // namespace transport
+}  // namespace transport

@@ -88,7 +88,15 @@ The simulation provides a command-line interface with several options:
 ./ai_gen_transport_2 --stats
 ```
 
-### Visualization
+### Development
+
+#### Code Style
+The project uses clang-format for consistent code style. Apply formatting with:
+```bash
+clang-format -i src/*.cxx include/*.hxx
+```
+
+#### Visualization
 The network can be visualized using Graphviz:
 ```bash
-dot -Tpng transport_network.dot -o network.png
+dot -Tpng networks/got.dot -o network.png
