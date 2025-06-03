@@ -1,0 +1,65 @@
+digraph transport_network {
+    // Graph settings
+    rankdir=LR;
+    node [shape=box, style=filled, fillcolor=lightblue];
+    edge [color=gray];
+
+    // City nodes with warehouse goods (in tons) and truck fleet
+    KingsLanding [label="King's Landing\nWarehouse:\nWood: 150t\nIron: 200t\nSilk: 80t\n\nTrucks:\nFord: 2 units (max 10t, 80km/h)\nMAN: 1 unit (max 25t, 70km/h)\nVW: 3 units (max 5t, 90km/h)"];
+
+    Winterfell [label="Winterfell\nWarehouse:\nWood: 300t\nIron: 120t\nSilk: 160t\n\nTrucks:\nFord: 3 units (max 10t, 80km/h)\nMAN: 2 units (max 25t, 70km/h)\nVW: 1 unit (max 5t, 90km/h)"];
+
+    Braavos [label="Braavos\nWarehouse:\nWood: 80t\nIron: 350t\nSilk: 220t\n\nTrucks:\nFord: 1 unit (max 10t, 80km/h)\nMAN: 3 units (max 25t, 70km/h)\nVW: 2 units (max 5t, 90km/h)"];
+
+    Oldtown [label="Oldtown\nWarehouse:\nWood: 240t\nIron: 180t\nSilk: 90t\n\nTrucks:\nFord: 4 units (max 10t, 80km/h)\nMAN: 1 unit (max 25t, 70km/h)\nVW: 2 units (max 5t, 90km/h)"];
+
+    Qarth [label="Qarth\nWarehouse:\nWood: 120t\nIron: 280t\nSilk: 140t\n\nTrucks:\nFord: 2 units (max 10t, 80km/h)\nMAN: 2 units (max 25t, 70km/h)\nVW: 1 unit (max 5t, 90km/h)"];
+
+    Pentos [label="Pentos\nWarehouse:\nWood: 190t\nIron: 110t\nSilk: 200t\n\nTrucks:\nFord: 1 unit (max 10t, 80km/h)\nMAN: 1 unit (max 25t, 70km/h)\nVW: 4 units (max 5t, 90km/h)"];
+
+    // Roads between cities with capacity and speed limits
+    // Road 1: King's Landing to Winterfell
+    KingsLanding -> Winterfell [label="Kingsroad North\nMax mass: 30t\nMax speed: 75km/h", color=blue];
+
+    // Road 2: King's Landing to Winterfell (alternative route)
+    KingsLanding -> Winterfell [label="River Road\nMax mass: 20t\nMax speed: 85km/h", color=green];
+
+    // Road 3: Winterfell to Braavos
+    Winterfell -> Braavos [label="White Harbor Route\nMax mass: 35t\nMax speed: 70km/h", color=blue];
+
+    // Road 4: Winterfell to Oldtown
+    Winterfell -> Oldtown [label="Western Trade Route\nMax mass: 25t\nMax speed: 80km/h", color=blue];
+
+    // Road 5: Winterfell to Oldtown (alternative route)
+    Winterfell -> Oldtown [label="Mountain Pass\nMax mass: 15t\nMax speed: 90km/h", color=green];
+
+    // Road 6: Braavos to Qarth
+    Braavos -> Qarth [label="Eastern Sea Route\nMax mass: 40t\nMax speed: 65km/h", color=blue];
+
+    // Road 7: Oldtown to Qarth
+    Oldtown -> Qarth [label="Valyrian Highway\nMax mass: 28t\nMax speed: 75km/h", color=blue];
+
+    // Road 8: Oldtown to Pentos
+    Oldtown -> Pentos [label="Narrow Sea Crossing\nMax mass: 22t\nMax speed: 85km/h", color=blue];
+
+    // Road 9: Qarth to Pentos
+    Qarth -> Pentos [label="Dothraki Sea Route\nMax mass: 32t\nMax speed: 70km/h", color=blue];
+
+    // Road 10: Qarth to Pentos (alternative route)
+    Qarth -> Pentos [label="Slaver's Bay Route\nMax mass: 18t\nMax speed: 95km/h", color=green];
+
+    // Road 11: King's Landing to Oldtown (long distance route)
+    KingsLanding -> Oldtown [label="Rose Road\nMax mass: 45t\nMax speed: 60km/h", color=red];
+
+    // Road 12: Braavos to Pentos (connecting route)
+    Braavos -> Pentos [label="Free Cities Highway\nMax mass: 26t\nMax speed: 78km/h", color=blue];
+
+    // Legend
+    subgraph cluster_legend {
+        label="Legend";
+        style=dashed;
+        fillcolor=lightyellow;
+
+        legend [label="Truck Types:\nFord: Light cargo (max 10t, 80km/h)\nMAN: Heavy cargo (max 25t, 70km/h)\nVW: Express cargo (max 5t, 90km/h)\n\nGoods Types:\nWood, Iron, Silk (measured in tons)\n\nRoad Colors:\nBlue: Standard roads\nGreen: Alternative routes\nRed: Long distance routes", shape=note, fillcolor=lightyellow];
+    }
+}
