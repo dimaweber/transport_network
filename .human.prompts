@@ -1,0 +1,33 @@
+promts used:
+
+1.
+generate .dot graph with next rules:
+- nodes are cities
+- edges are roads
+- each city has property which describe amount (mass) of goods type a, b, c it has (in tons)
+- each road has property which desribe: distance in km, max allowed speed in km/h and max total mass of goods it allow to transfer per h
+- 2 citier can be joined with more then 1 road
+- generate an example of .dot with 10 cities and 2-3 roads from each city.
+
+2.
+give command line to visualize this graph
+
+3.
+dot on linux is enough, no need for macos.
+
+4.
+generate cpp console app that will have next parameters:
+- --dest-city -- name of dest city
+- --dest-time -- time (24h format) when goods should arrive
+--good-name -- good name should arrive it named city at named time
+--good-mass -- mass of goods to arrive in city
+
+program should print table with source city, time, amout of goods sent from it
+goods are transferred with max allowed speed (road max allowed speed)
+
+5.
+can you use CLI11 library for args parsing please (already installed)
+also use fmt 11 for 
+
+6.
+please parse .dot file (supplied with --file parameter) instead of hardcoded graph
